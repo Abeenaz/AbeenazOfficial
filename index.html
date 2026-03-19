@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Abeenaz — Luxury Beauty Parlour</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <canvas id="bg-canvas"></canvas>
+  <div class="bg-overlay"></div>
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-follower" id="cursor-follower"></div>
+  <div class="toast" id="toast"></div>
+
+
+  <!-- ════════════════════════════════════════════════
+       SCREEN 1 — WELCOME
+  ════════════════════════════════════════════════ -->
+  <section class="screen active" id="s-welcome">
+    <div class="welcome-layout">
+
+      <div class="brand-block">
+        <div class="brand-emblem">
+          <svg viewBox="0 0 80 80" fill="none">
+            <circle cx="40" cy="40" r="38" stroke="url(#g1)" stroke-width="1"/>
+            <path d="M40 16L40 64M16 40L64 40" stroke="url(#g1)" stroke-width=".8" opacity=".4"/>
+            <path d="M25 25L55 55M55 25L25 55" stroke="url(#g1)" stroke-width=".8" opacity=".3"/>
+            <circle cx="40" cy="40" r="6" fill="url(#g1)" opacity=".9"/>
+            <defs>
+              <linearGradient id="g1" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#e8c97e"/>
+                <stop offset="100%" stop-color="#b8860b"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <h1 class="brand-name" id="site-brand-name">Abeenaz</h1>
+        <p class="brand-tagline" id="site-brand-tagline">where luxury meets you</p>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-step">WELCOME</span>
+          <h2 class="card-title">Enter Your Number</h2>
+          <p class="card-desc">Your mobile number is your key to Abeenaz</p>
+        </div>
+        <div class="phone-field">
+          <div class="phone-prefix"><span>🇵🇰</span><span>+92</span></div>
+          <input type="tel" id="inp-phone" class="phone-input" placeholder="3XX XXX XXXX" maxlength="10" inputmode="numeric" autocomplete="off"/>
+        </div>
+        <button class="btn-primary" onclick="handlePhone()">
+          <span>Continue</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <button class="btn-ghost" onclick="goExplore('guest')">✦ Explore without login</button>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════
+       SCREEN 2 — PIN ENTRY
+  ════════════════════════════════════════════════ -->
+  <section class="screen" id="s-pin">
+    <div class="center-layout">
+      <div class="back-btn" onclick="goScreen('s-welcome')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M11 6l-6 6 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Back
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="avatar-ring" id="pin-avatar">A</div>
+          <h2 class="card-title" id="pin-title">Enter PIN</h2>
+          <p class="card-desc"  id="pin-desc">Enter your 4-digit PIN</p>
+        </div>
+        <div class="pin-row" id="pin-row">
+          <div class="pin-dot" id="pd0"></div><div class="pin-dot" id="pd1"></div>
+          <div class="pin-dot" id="pd2"></div><div class="pin-dot" id="pd3"></div>
+        </div>
+        <div class="numpad">
+          <button class="nk" onclick="numPress('1')">1</button><button class="nk" onclick="numPress('2')">2</button><button class="nk" onclick="numPress('3')">3</button>
+          <button class="nk" onclick="numPress('4')">4</button><button class="nk" onclick="numPress('5')">5</button><button class="nk" onclick="numPress('6')">6</button>
+          <button class="nk" onclick="numPress('7')">7</button><button class="nk" onclick="numPress('8')">8</button><button class="nk" onclick="numPress('9')">9</button>
+          <button class="nk ghost" onclick="clearPin()">CLR</button><button class="nk" onclick="numPress('0')">0</button><button class="nk del" onclick="delPin()">⌫</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════
+       SCREEN 3 — SET PIN
+  ════════════════════════════════════════════════ -->
+  <section class="screen" id="s-newpin">
+    <div class="center-layout">
+      <div class="card">
+        <div class="card-header">
+          <div class="step-badge" id="newpin-step-badge">Step 1 of 2</div>
+          <h2 class="card-title" id="newpin-title">Create Your PIN</h2>
+          <p class="card-desc"  id="newpin-desc">Choose a new 4-digit PIN</p>
+        </div>
+        <div class="pin-row" id="newpin-row">
+          <div class="pin-dot" id="npd0"></div><div class="pin-dot" id="npd1"></div>
+          <div class="pin-dot" id="npd2"></div><div class="pin-dot" id="npd3"></div>
+        </div>
+        <div class="numpad">
+          <button class="nk" onclick="newNumPress('1')">1</button><button class="nk" onclick="newNumPress('2')">2</button><button class="nk" onclick="newNumPress('3')">3</button>
+          <button class="nk" onclick="newNumPress('4')">4</button><button class="nk" onclick="newNumPress('5')">5</button><button class="nk" onclick="newNumPress('6')">6</button>
+          <button class="nk" onclick="newNumPress('7')">7</button><button class="nk" onclick="newNumPress('8')">8</button><button class="nk" onclick="newNumPress('9')">9</button>
+          <button class="nk ghost" onclick="clearNewPin()">CLR</button><button class="nk" onclick="newNumPress('0')">0</button><button class="nk del" onclick="delNewPin()">⌫</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════
+       SCREEN 4 — STRANGER (name, straight to explore)
+  ════════════════════════════════════════════════ -->
+  <section class="screen" id="s-stranger">
+    <div class="center-layout">
+      <div class="card stranger-card">
+        <div class="stranger-top">
+          <div class="stranger-icon">🌿</div>
+          <h2 class="card-title">You're Not Listed <span class="gold">Yet</span></h2>
+          <p class="card-desc">Your number isn't in our list — but explore freely!</p>
+        </div>
+        <div class="chat-bubble">
+          <div class="chat-who">✦ Abeenaz</div>
+          <p id="stranger-chat-msg">Hello! Feel free to explore what Abeenaz offers. 💛</p>
+        </div>
+        <div class="field">
+          <label class="field-label">Your name (optional)</label>
+          <input type="text" id="inp-stranger-name" class="field-input" placeholder="e.g. Sara" maxlength="30"/>
+        </div>
+        <button class="btn-primary" onclick="saveStrangerName()">
+          <span>Explore Abeenaz</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <button class="btn-ghost" onclick="goScreen('s-welcome')">← Try Another Number</button>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════
+       SCREEN 5 — EXPLORE (public page)
+  ════════════════════════════════════════════════ -->
+  <section class="screen" id="s-explore">
+    <div class="explore-layout">
+
+      <header class="explore-header">
+        <div class="explore-brand serif gold" id="explore-header-brand">Abeenaz</div>
+        <nav class="explore-nav">
+          <a href="#vibe-block"     class="enav">Vibe</a>
+          <a href="#about-block"    class="enav">About</a>
+          <a href="#lookbook-block" class="enav">Lookbook</a>
+          <a href="#services-block" class="enav">Services</a>
+          <a href="#loyalty-block"  class="enav">Loyalty</a>
+        </nav>
+        <div class="explore-header-right">
+          <div class="explore-greeting" id="explore-greeting">Hello, <span class="gold">Guest</span></div>
+          <button class="sign-out-btn" id="explore-action-btn" onclick="logout()">Exit</button>
+        </div>
+      </header>
+
+      <!-- Hero -->
+      <div class="explore-hero">
+        <div class="hero-label" id="hero-label">BEAUTY PARLOUR · EST. 2023</div>
+        <h1 class="hero-title"  id="hero-title">Where Every Woman<br/><em>Deserves to Shine</em></h1>
+        <p class="hero-sub"     id="hero-sub">Premium beauty services crafted with care, artistry and the finest products.</p>
+        <div class="hero-cta-row">
+          <div class="hero-stat"><span class="stat-num" id="stat-clients">500+</span><span class="stat-lbl">Happy Clients</span></div>
+          <div class="hero-divider"></div>
+          <div class="hero-stat"><span class="stat-num" id="stat-exp">5+</span><span class="stat-lbl">Years of Artistry</span></div>
+          <div class="hero-divider"></div>
+          <div class="hero-stat"><span class="stat-num" id="stat-services">30+</span><span class="stat-lbl">Services</span></div>
+        </div>
+      </div>
+
+      <!-- Vibe-Based Search -->
+      <div class="section-block" id="vibe-block">
+        <div class="section-tag">HOW DO YOU WANT TO FEEL TODAY?</div>
+        <h2 class="section-title">Choose Your Vibe</h2>
+        <div class="vibe-grid" id="vibe-grid"></div>
+        <div class="vibe-result" id="vibe-result" style="display:none;"></div>
+      </div>
+
+      <!-- About -->
+      <div class="section-block" id="about-block">
+        <div class="section-tag">ABOUT US</div>
+        <h2 class="section-title">Our Story</h2>
+        <div class="about-grid">
+          <div class="about-text" id="about-text">
+            <p>Abeenaz was born from a simple belief — every woman deserves to feel extraordinary.</p>
+          </div>
+          <div class="about-pillars">
+            <div class="pillar"><div class="pillar-icon">💎</div><div class="pillar-text"><strong>Premium Quality</strong><span>Only the finest products</span></div></div>
+            <div class="pillar"><div class="pillar-icon">🎨</div><div class="pillar-text"><strong>Expert Artistry</strong><span>Trained professionals</span></div></div>
+            <div class="pillar"><div class="pillar-icon">🌸</div><div class="pillar-text"><strong>Personal Touch</strong><span>Every client is unique</span></div></div>
+            <div class="pillar"><div class="pillar-icon">✨</div><div class="pillar-text"><strong>Lasting Results</strong><span>Beauty that endures</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lookbook -->
+      <div class="section-block" id="lookbook-block">
+        <div class="section-tag">THE LOOKBOOK</div>
+        <h2 class="section-title">Get Inspired</h2>
+        <div class="lookbook-grid" id="lookbook-grid"></div>
+      </div>
+
+      <!-- Speciality -->
+      <div class="section-block" id="spec-block">
+        <div class="section-tag">OUR SPECIALITY</div>
+        <h2 class="section-title">What We Excel At</h2>
+        <div class="spec-grid">
+          <div class="spec-card" data-delay="0"><div class="spec-number">01</div><div class="spec-icon">💆‍♀️</div><h3>Bridal Makeup</h3><p>Flawless looks from mehendi to walima.</p></div>
+          <div class="spec-card" data-delay="100"><div class="spec-number">02</div><div class="spec-icon">💇‍♀️</div><h3>Hair Styling</h3><p>From cuts to keratin — your hair is our canvas.</p></div>
+          <div class="spec-card" data-delay="200"><div class="spec-number">03</div><div class="spec-icon">💅</div><h3>Nail Art Studio</h3><p>Gel, acrylic, extensions — crafted with passion.</p></div>
+          <div class="spec-card" data-delay="300"><div class="spec-number">04</div><div class="spec-icon">🧖‍♀️</div><h3>Skin Therapy</h3><p>Brightening, anti-aging, glass-skin treatments.</p></div>
+        </div>
+      </div>
+
+      <!-- Services -->
+      <div class="section-block" id="services-block">
+        <div class="section-tag">SERVICES & PRICING</div>
+        <h2 class="section-title">What We Offer</h2>
+        <div class="services-tabs" id="services-tabs-row"></div>
+        <div id="services-panels"></div>
+      </div>
+
+      <!-- Loyalty Shop -->
+      <div class="section-block" id="loyalty-block">
+        <div class="section-tag">LOYALTY REWARDS</div>
+        <h2 class="section-title">Redeem Your Points</h2>
+        <p class="section-sub" id="loyalty-rate-note">Earn 1 point for every Rs.100 spent.</p>
+        <div class="loyalty-grid" id="loyalty-grid"></div>
+      </div>
+
+      <!-- Tier Explainer -->
+      <div class="section-block" id="tiers-block">
+        <div class="section-tag">ABEENAZ STATUS</div>
+        <h2 class="section-title">Your Rank, Your Perks</h2>
+        <div class="tiers-explainer">
+          <div class="tier-exp-card new"><div class="tec-rank">🆕 New</div><div class="tec-spend">Rs. 0+</div><div class="tec-perks">Welcome perks</div></div>
+          <div class="tier-exp-card bronze"><div class="tec-rank">🥉 Bronze</div><div class="tec-spend">Rs. 5,000+</div><div class="tec-perks">Member status</div></div>
+          <div class="tier-exp-card silver"><div class="tec-rank">🥈 Silver</div><div class="tec-spend">Rs. 10,000+</div><div class="tec-perks">5% off all services</div></div>
+          <div class="tier-exp-card gold"><div class="tec-rank">⭐ Gold</div><div class="tec-spend">Rs. 20,000+</div><div class="tec-perks">10% off all services</div></div>
+          <div class="tier-exp-card diamond"><div class="tec-rank">💎 Diamond</div><div class="tec-spend">Rs. 35,000+</div><div class="tec-perks">10% off + 🎂 Birthday 5% + 1.1× Points</div></div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="explore-cta">
+        <h2 class="serif" style="font-size:2rem;font-weight:400;">Ready to Join <em>Abeenaz?</em></h2>
+        <p id="cta-text">Visit us to get registered and unlock exclusive member benefits.</p>
+        <div class="cta-contact">
+          <div class="contact-pill" id="cta-address">📍 Karachi, Pakistan</div>
+          <div class="contact-pill" id="cta-phone">📞 +92 319 264 1891</div>
+          <div class="contact-pill" id="cta-hours">🕐 Mon–Sat, 10am–8pm</div>
+        </div>
+      </div>
+      <footer class="explore-footer">
+        <span class="serif gold" id="footer-brand">Abeenaz</span> · Luxury Beauty Parlour · All rights reserved
+      </footer>
+
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════
+       SCREEN 6 — CLIENT DASHBOARD
+  ════════════════════════════════════════════════ -->
+  <section class="screen" id="s-client">
+    <div class="dash-layout">
+
+      <header class="dash-header">
+        <div>
+          <p class="dash-welcome">Welcome back,</p>
+          <h2 class="dash-name serif" id="dash-name">Guest</h2>
+        </div>
+        <div style="display:flex;gap:.6rem;align-items:center;">
+          <button class="btn-ghost-sm" onclick="goExplore('client')">✦ Explore</button>
+          <button class="sign-out-btn" onclick="logout()">Sign Out</button>
+        </div>
+      </header>
+
+      <div class="rank-pill" id="rank-pill">⭐ Gold Client</div>
+
+      <!-- Warning bar (multi-state) -->
+      <div class="maint-warning" id="maint-warning" style="display:none;"></div>
+
+      <!-- Main grid -->
+      <div class="dash-grid">
+
+        <!-- Maintenance ring + account info -->
+        <div class="dash-card">
+          <div class="dash-card-label">Monthly Maintenance</div>
+          <div id="client-maint-ring" style="display:flex;justify-content:center;margin-bottom:.8rem;"></div>
+          <div class="rank-progress-wrap">
+            <div class="rank-progress-bar"><div class="rank-progress-fill" id="di-progress-fill"></div></div>
+            <div class="rank-progress-lbl" id="di-progress-lbl">—</div>
+          </div>
+        </div>
+
+        <!-- Loyalty points -->
+        <div class="dash-card">
+          <div class="dash-card-label">Loyalty Points 💎</div>
+          <div class="big-number" id="di-points">0</div>
+          <div class="big-number-lbl">points earned</div>
+          <div class="diamond-note" id="di-diamond-note" style="display:none;">✦ 1.1× Diamond Bonus active</div>
+          <div class="diamond-note" id="di-birthday-note" style="display:none;color:var(--rose);">🎂 Birthday month bonus!</div>
+        </div>
+
+        <!-- Account info -->
+        <div class="dash-card span2">
+          <div class="dash-card-label">Account Info</div>
+          <div class="info-rows">
+            <div class="info-row"><span>Phone</span><span id="di-phone">—</span></div>
+            <div class="info-row"><span>Rank</span><span id="di-rank">—</span></div>
+            <div class="info-row"><span>Member Since</span><span id="di-since">—</span></div>
+            <div class="info-row"><span>Total Visits</span><span id="di-visits">—</span></div>
+            <div class="info-row"><span>Lifetime Spend</span><span id="di-lifetime">—</span></div>
+            <div class="info-row"><span>This Month</span><span id="di-monthly">—</span></div>
+            <div class="info-row"><span>Your Discount</span><span id="di-discount" class="gold">—</span></div>
+            <div class="info-row" id="di-referral-row" style="display:none;">
+              <span>🎁 Referral Bonus</span>
+              <span class="gold" id="di-referral-txt">10% off next visit!</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visit history -->
+        <div class="dash-card span2">
+          <div class="dash-card-label">Visit History</div>
+          <div class="visit-list scrollable" id="di-visit-history">
+            <div class="empty-state">No visits recorded yet</div>
+          </div>
+        </div>
+
+      </div>
+
+      <button class="btn-secondary" onclick="goUpdatePin()">🔑 Change PIN</button>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════
+       SCREEN 7 — ADMIN PANEL
+  ════════════════════════════════════════════════ -->
+  <section class="screen" id="s-admin">
+    <div class="admin-layout">
+
+      <header class="dash-header">
+        <div>
+          <p class="dash-welcome">Abeenaz Admin ✦ Status Engine v5</p>
+          <h2 class="dash-name serif" id="admin-name">Management</h2>
+        </div>
+        <div style="display:flex;gap:.6rem;align-items:center;">
+          <button class="btn-ghost-sm" onclick="goExplore('admin')">✦ Explore</button>
+          <button class="sign-out-btn" onclick="logout()">Sign Out</button>
+        </div>
+      </header>
+
+      <!-- Stats Bar -->
+      <div class="admin-stats-bar">
+        <div class="a-stat"><span class="a-stat-num" id="stat-total">0</span><span class="a-stat-lbl">Clients</span></div>
+        <div class="a-stat"><span class="a-stat-num gold" id="stat-diamond">0</span><span class="a-stat-lbl">Diamond</span></div>
+        <div class="a-stat"><span class="a-stat-num" id="stat-gold">0</span><span class="a-stat-lbl">Gold</span></div>
+        <div class="a-stat"><span class="a-stat-num" id="stat-silver">0</span><span class="a-stat-lbl">Silver</span></div>
+        <div class="a-stat"><span class="a-stat-num" id="stat-referrals">0</span><span class="a-stat-lbl">Referrals</span></div>
+        <div class="a-stat"><span class="a-stat-num" style="color:var(--rose);" id="stat-at-risk">0</span><span class="a-stat-lbl">⚠ At Risk</span></div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="admin-tabs">
+        <button class="a-tab active"  data-tab="clients"     onclick="switchATab(this,'clients')">👥 Clients</button>
+        <button class="a-tab"         data-tab="visit"       onclick="switchATab(this,'visit')">📋 Visit</button>
+        <button class="a-tab"         data-tab="redeem"      onclick="switchATab(this,'redeem')">🎁 Redeem</button>
+        <button class="a-tab"         data-tab="add-client"  onclick="switchATab(this,'add-client')">➕ Add</button>
+        <button class="a-tab"         data-tab="revenue"     onclick="switchATab(this,'revenue')">💰 Revenue</button>
+        <button class="a-tab"         data-tab="alerts"      onclick="switchATab(this,'alerts')">🔔 Alerts</button>
+        <button class="a-tab"         data-tab="staff"       onclick="switchATab(this,'staff')">👩‍💼 Staff</button>
+        <button class="a-tab"         data-tab="inventory"   onclick="switchATab(this,'inventory')">📦 Stock</button>
+        <button class="a-tab"         data-tab="loyalty-admin" onclick="switchATab(this,'loyalty-admin')">🏆 Loyalty</button>
+        <button class="a-tab"         data-tab="customize"   onclick="switchATab(this,'customize')">🎨 Customize</button>
+        <button class="a-tab"         data-tab="admins"      onclick="switchATab(this,'admins')">🔑 Admins</button>
+      </div>
+
+
+      <!-- ── TAB: Clients ── -->
+      <div class="a-tab-content active" id="tab-clients">
+        <div class="admin-search-bar">
+          <input type="text" id="client-search" class="field-input" placeholder="Search by name or number…" oninput="renderClientList()"/>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title">All Clients <span class="count-badge" id="clients-count">0</span></div>
+          <p class="card-desc" style="margin-bottom:.8rem;font-size:.75rem;">
+            Each client shows a maintenance ring — green=on track, gold=warning, red=at risk.
+            Click any row to view full details and admin controls.
+          </p>
+          <div class="admin-list scrollable" id="admin-client-list"></div>
+        </div>
+      </div>
+
+
+      <!-- ── TAB: Auto Visit Engine ── -->
+      <div class="a-tab-content" id="tab-visit">
+        <div class="admin-card">
+          <div class="admin-card-title">Auto Visit Engine</div>
+          <p class="card-desc" style="margin-bottom:1.2rem;">
+            Enter client + service → rank discount, referral bonus, birthday bonus, and points are all calculated automatically.
+          </p>
+          <div class="field">
+            <label class="field-label">Client Phone</label>
+            <div class="phone-field">
+              <div class="phone-prefix"><span>🇵🇰</span><span>+92</span></div>
+              <input type="tel" id="inp-visit-phone" class="phone-input" placeholder="3XX XXX XXXX" maxlength="10" inputmode="numeric" oninput="liveClientLookup()"/>
+            </div>
+          </div>
+          <div class="client-lookup-result" id="client-lookup-result" style="display:none;"></div>
+          <div class="field">
+            <label class="field-label">Service</label>
+            <select class="field-select" id="inp-visit-service" onchange="onServiceSelect()">
+              <option value="">— Select a service —</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label">Original Price (Rs.) — auto-fills from service</label>
+            <input type="number" id="inp-visit-spend" class="field-input" placeholder="e.g. 2500" min="0" oninput="calcVisitPreview()"/>
+          </div>
+          <div class="field">
+            <label class="field-label">Assign to Staff (optional)</label>
+            <select class="field-select" id="inp-visit-staff">
+              <option value="">— Assign Staff —</option>
+            </select>
+          </div>
+          <div class="visit-calc-preview" id="visit-calc-preview" style="display:none;"></div>
+          <button class="btn-primary" onclick="logVisit()">
+            <span>Complete Visit &amp; Update Rank</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="visit-result-card" id="visit-result-card" style="display:none;"></div>
+      </div>
+
+
+      <!-- ── TAB: Loyalty Redeemer ── -->
+      <div class="a-tab-content" id="tab-redeem">
+        <div class="admin-card">
+          <div class="admin-card-title">🎁 Loyalty Redeemer</div>
+          <p class="card-desc" style="margin-bottom:1.2rem;">
+            Enter client phone, select their reward, and deduct points instantly.
+          </p>
+          <div class="field">
+            <label class="field-label">Client Phone</label>
+            <div class="phone-field">
+              <div class="phone-prefix"><span>🇵🇰</span><span>+92</span></div>
+              <input type="tel" id="inp-redeem-phone" class="phone-input" placeholder="3XX XXX XXXX" maxlength="10" inputmode="numeric" oninput="liveRedeemerLookup()"/>
+            </div>
+          </div>
+          <div class="client-lookup-result" id="redeem-client-result" style="display:none;"></div>
+          <div class="field">
+            <label class="field-label">Select Reward</label>
+            <select class="field-select" id="inp-redeem-item">
+              <option value="">— Select reward —</option>
+            </select>
+          </div>
+          <button class="btn-primary" onclick="redeemLoyalty()">
+            <span>Redeem &amp; Deduct Points</span>
+          </button>
+        </div>
+        <div class="visit-result-card" id="redeem-result-card" style="display:none;"></div>
+      </div>
+
+
+      <!-- ── TAB: Add Client ── -->
+      <div class="a-tab-content" id="tab-add-client">
+        <div class="admin-card">
+          <div class="admin-card-title">Register New Client</div>
+          <div class="field">
+            <label class="field-label">Phone Number</label>
+            <div class="phone-field">
+              <div class="phone-prefix"><span>🇵🇰</span><span>+92</span></div>
+              <input type="tel" id="inp-add-phone" class="phone-input" placeholder="3XX XXX XXXX" maxlength="10" inputmode="numeric"/>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Client Name</label>
+            <input type="text" id="inp-add-name" class="field-input" placeholder="e.g. Ayesha Khan" maxlength="40"/>
+          </div>
+          <div class="field">
+            <label class="field-label">Birthday (YYYY-MM-DD, optional)</label>
+            <input type="text" id="inp-add-bday" class="field-input" placeholder="1995-03-10"/>
+          </div>
+          <div class="field">
+            <label class="field-label">Referred By (phone, optional)</label>
+            <div class="phone-field">
+              <div class="phone-prefix"><span>🇵🇰</span><span>+92</span></div>
+              <input type="tel" id="inp-add-referrer" class="phone-input" placeholder="3XX XXX XXXX" maxlength="10" inputmode="numeric"/>
+            </div>
+          </div>
+          <div class="referrer-lookup" id="referrer-lookup" style="display:none;"></div>
+          <button class="btn-primary" onclick="addClient()">
+            <span>Add Client</span>
+          </button>
+          <p class="card-note" style="margin-top:1rem;">
+            Rank starts at New → Bronze at Rs.5,000. Referral gives both parties 10% off their next visit.
+          </p>
+        </div>
+      </div>
+
+
+      <!-- ── TAB: Revenue ── -->
+      <div class="a-tab-content" id="tab-revenue">
+        <div class="admin-card">
+          <div class="admin-card-title">💰 Monthly Revenue</div>
+          <p class="card-desc" style="margin-bottom:1.2rem;">
+            Tracks actual charged amounts (after rank discounts) from all visits.
+          </p>
+          <div id="revenue-panel"><div class="empty-state">No revenue yet</div></div>
+        </div>
+      </div>
+
+
+      <!-- ── TAB: Alerts ── -->
+      <div class="a-tab-content" id="tab-alerts">
+        <div class="admin-card">
+          <div class="admin-card-title">🔔 Maintenance Alerts</div>
+          <div class="alert-legend">
+            <span class="legend-item"><span class="legend-dot" style="background:#c9a84c;"></span>Day-15 Early Warning</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#c08040;"></span>Day-25 Grace Alert</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#c07070;"></span>Demoted</span>
+          </div>
+          <div class="admin-list scrollable" id="alerts-list"></div>
+        </div>
+        <div class="admin-card" style="margin-top:1rem;">
+          <div class="admin-card-title">📊 Rank Engine Rules</div>
+          <div class="tier-table">
+            <div class="tier-row header"><span>Tier</span><span>Lifetime</span><span>Monthly Min</span><span>Perks</span></div>
+            <div class="tier-row diamond"><span>💎 Diamond</span><span>Rs.35,000</span><span>Rs.7,000</span><span>10%+🎂+1.1×pts</span></div>
+            <div class="tier-row gold">   <span>⭐ Gold</span>   <span>Rs.20,000</span><span>Rs.4,000</span><span>10% off</span></div>
+            <div class="tier-row silver"> <span>🥈 Silver</span> <span>Rs.10,000</span><span>Rs.2,000</span><span>5% off</span></div>
+            <div class="tier-row bronze"> <span>🥉 Bronze</span> <span>Rs.5,000</span> <span>Rs.1,000</span><span>—</span></div>
+          </div>
+          <div class="rule-box">
+            <div class="rule-title">⚙️ Drop &amp; Restore Logic</div>
+            <div class="rule-item">📅 <strong>Day 15 alert:</strong> Past mid-month, maintenance not met → early warning</div>
+            <div class="rule-item">⚡ <strong>Day 25 alert:</strong> Grace-period WhatsApp message auto-triggered</div>
+            <div class="rule-item">⬇️ <strong>2 missed months in a row</strong> → rank drops one tier</div>
+            <div class="rule-item">⬆️ <strong>Restore:</strong> Spend previous rank's monthly min within 2 months of demotion</div>
+            <div class="rule-item">🔒 <strong>VIP Lock:</strong> Admin can lock rank to prevent automatic changes</div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ── TAB: Staff Portal ── -->
+      <div class="a-tab-content" id="tab-staff">
+        <div class="admin-card">
+          <div class="admin-card-title">👩‍💼 Staff &amp; Commission</div>
+          <p class="card-desc" style="margin-bottom:1rem;">
+            Assign staff when logging visits — commissions are tracked automatically.
+          </p>
+          <div id="staff-panel"></div>
+        </div>
+        <div class="admin-card" style="margin-top:1rem;">
+          <div class="admin-card-title">Add Staff Member</div>
+          <div class="cust-grid">
+            <div class="field"><label class="field-label">Name</label><input type="text" id="inp-staff-name" class="field-input" placeholder="e.g. Nadia"/></div>
+            <div class="field"><label class="field-label">Role</label><input type="text" id="inp-staff-role" class="field-input" placeholder="e.g. Senior Stylist"/></div>
+            <div class="field"><label class="field-label">Commission %</label><input type="number" id="inp-staff-pct" class="field-input" placeholder="15" min="0" max="100"/></div>
+          </div>
+          <button class="btn-primary" style="margin-top:.5rem;" onclick="addStaffMember()"><span>Add Staff Member</span></button>
+        </div>
+      </div>
+
+
+      <!-- ── TAB: Inventory ── -->
+      <div class="a-tab-content" id="tab-inventory">
+        <div class="admin-card">
+          <div class="admin-card-title">📦 Inventory Tracker</div>
+          <p class="card-desc" style="margin-bottom:1rem;">
+            Items highlighted in red are at or below the low-stock threshold.
+          </p>
+          <div id="inventory-panel"></div>
+        </div>
+        <div class="admin-card" style="margin-top:1rem;">
+          <div class="admin-card-title">Add Inventory Item</div>
+          <div class="cust-grid">
+            <div class="field"><label class="field-label">Item Name</label><input type="text" id="inp-inv-name" class="field-input" placeholder="e.g. Keratin Solution"/></div>
+            <div class="field"><label class="field-label">Current Qty</label><input type="number" id="inp-inv-qty" class="field-input" placeholder="5" min="0"/></div>
+            <div class="field"><label class="field-label">Alert When Below</label><input type="number" id="inp-inv-low" class="field-input" placeholder="2" min="0"/></div>
+            <div class="field"><label class="field-label">Unit</label><input type="text" id="inp-inv-unit" class="field-input" placeholder="bottles"/></div>
+          </div>
+          <button class="btn-primary" style="margin-top:.5rem;" onclick="addInventoryItem()"><span>Add Item</span></button>
+        </div>
+      </div>
+
+
+      <!-- ── TAB: Loyalty Admin ── -->
+      <div class="a-tab-content" id="tab-loyalty-admin">
+        <div class="admin-card">
+          <div class="admin-card-title">Points Rate</div>
+          <div class="field"><label class="field-label">Points per Rs.100 spent</label>
+            <input type="number" id="inp-pts-rate" class="field-input" placeholder="1" min="1" max="100"/>
+          </div>
+          <button class="btn-primary" onclick="savePointsRate()"><span>Save Rate</span></button>
+        </div>
+        <div class="admin-card" style="margin-top:1rem;">
+          <div class="admin-card-title">Shop Items <span class="count-badge" id="shop-count">0</span></div>
+          <div class="admin-list scrollable" id="shop-admin-list"></div>
+          <div class="divider-line"></div>
+          <div class="admin-card-title" style="margin-top:1rem;">Add Item</div>
+          <div class="field"><label class="field-label">Item Name</label><input type="text" id="inp-shop-name" class="field-input" placeholder="e.g. Free Facial"/></div>
+          <div class="field"><label class="field-label">Points Required</label><input type="number" id="inp-shop-pts" class="field-input" placeholder="500" min="1"/></div>
+          <div class="field"><label class="field-label">Description</label><input type="text" id="inp-shop-desc" class="field-input" placeholder="e.g. One basic facial session"/></div>
+          <button class="btn-primary" onclick="addShopItem()"><span>Add to Shop</span></button>
+        </div>
+      </div>
+
+
+      <!-- ── TAB: Customize ── -->
+      <div class="a-tab-content" id="tab-customize">
+        <div class="admin-card">
+          <div class="admin-card-title">🌐 Website Identity</div>
+          <div class="cust-grid">
+            <div class="field"><label class="field-label">Brand Name</label>           <input type="text" id="cust-brand"         class="field-input" placeholder="Abeenaz"/></div>
+            <div class="field"><label class="field-label">Tagline</label>              <input type="text" id="cust-tagline"       class="field-input" placeholder="where luxury meets you"/></div>
+            <div class="field"><label class="field-label">Hero Title</label>           <input type="text" id="cust-hero-title"    class="field-input"/></div>
+            <div class="field"><label class="field-label">Hero Subtitle</label>        <input type="text" id="cust-hero-sub"      class="field-input"/></div>
+            <div class="field"><label class="field-label">Est. Year</label>            <input type="text" id="cust-est"           class="field-input" placeholder="2023"/></div>
+            <div class="field"><label class="field-label">Clients Stat</label>         <input type="text" id="cust-stat-clients"  class="field-input" placeholder="500+"/></div>
+            <div class="field"><label class="field-label">Years Exp Stat</label>       <input type="text" id="cust-stat-exp"      class="field-input" placeholder="5+"/></div>
+            <div class="field"><label class="field-label">Services Stat</label>        <input type="text" id="cust-stat-services" class="field-input" placeholder="30+"/></div>
+            <div class="field"><label class="field-label">Address</label>              <input type="text" id="cust-address"       class="field-input" placeholder="Karachi, Pakistan"/></div>
+            <div class="field"><label class="field-label">Contact</label>              <input type="text" id="cust-contact"       class="field-input" placeholder="+92 319 264 1891"/></div>
+            <div class="field"><label class="field-label">Working Hours</label>        <input type="text" id="cust-hours"         class="field-input" placeholder="Mon–Sat, 10am–8pm"/></div>
+            <div class="field"><label class="field-label">CTA Text</label>             <input type="text" id="cust-cta"           class="field-input"/></div>
+          </div>
+          <div class="field" style="margin-top:.5rem;">
+            <label class="field-label">About Us Text</label>
+            <textarea id="cust-about" class="field-textarea" rows="5"></textarea>
+          </div>
+          <button class="btn-primary" style="margin-top:1rem;" onclick="saveCustomization()">
+            <span>💾 Save All Changes</span>
+          </button>
+        </div>
+        <div class="admin-card" style="margin-top:1rem;">
+          <div class="admin-card-title">🗂️ Manage Services</div>
+          <div id="services-admin-panel"></div>
+          <div class="divider-line"></div>
+          <div class="admin-card-title" style="margin-top:1rem;">Add Category</div>
+          <div class="field"><label class="field-label">Category Name</label><input type="text" id="inp-cat-name" class="field-input" placeholder="e.g. Makeup"/></div>
+          <button class="btn-primary" onclick="addCategory()"><span>Add Category</span></button>
+        </div>
+      </div>
+
+
+      <!-- ── TAB: Admins ── -->
+      <div class="a-tab-content" id="tab-admins">
+        <div class="admin-card">
+          <div class="admin-card-title">Admins <span class="count-badge" id="admins-count">0</span></div>
+          <div class="admin-list scrollable" id="admin-admin-list"></div>
+        </div>
+        <div class="admin-card" style="margin-top:1rem;">
+          <div class="admin-card-title">Add Admin</div>
+          <div class="field">
+            <label class="field-label">Phone Number</label>
+            <div class="phone-field">
+              <div class="phone-prefix"><span>🇵🇰</span><span>+92</span></div>
+              <input type="tel" id="inp-add-admin" class="phone-input" placeholder="3XX XXX XXXX" maxlength="10" inputmode="numeric"/>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="addAdmin()"><span>Grant Admin Access</span></button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════
+       MODAL — Client Detail + Admin Overrides
+  ════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="modal-overlay" onclick="closeModal()"></div>
+  <div class="modal" id="client-modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modal-content"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
