@@ -1123,8 +1123,10 @@ function loadAdminPanel() {
   renderRevenuePanel();
   renderInventoryPanel();
   renderStaffPanel();
+  renderLookbookAdmin();
   loadCustomFields();
   renderServiceSelectOptions();
+  renderStaffSelectOptions();
   goScreen('s-admin');
 }
 
@@ -1542,17 +1544,43 @@ function saveClientName(phone) {
   if (!n) { showToast('Enter a name', 'error'); return; }
   DB.clients[phone].name = n;
   saveDB();
-  showToast('Name updated to ' + n, 'success');
+  /* Update the modal title live so user sees the change immediately */
+  var titleEl = document.querySelector('#client-modal .modal-title');
+  if (titleEl) titleEl.textContent = n + (DB.clients[phone].rankLocked ? ' 🔒' : '');
+  /* Update the modal avatar initial */
+  var avatarEl = document.querySelector('#client-modal .modal-avatar');
+  if (avatarEl) avatarEl.textContent = n[0].toUpperCase();
+  /* Refresh admin list in background */
+  renderClientList();
+  refreshAdminStats();
+  /* Visual feedback — flash the input green */
+  var inp = document.getElementById('modal-name-inp');
+  if (inp) {
+    inp.style.borderColor = '#70c090';
+    inp.style.boxShadow   = '0 0 0 3px rgba(112,192,144,0.15)';
+    setTimeout(function () {
+      inp.style.borderColor = '';
+      inp.style.boxShadow   = '';
+    }, 1500);
+  }
+  showToast('Name updated to ' + n + ' ✦', 'success');
 }
 
 function saveModalOverrides(phone) {
-  var c = DB.clients[phone];
-  c.name     = (document.getElementById('modal-name-inp').value  || '').trim() || c.name;
+  var c       = DB.clients[phone];
+  var newName = (document.getElementById('modal-name-inp').value  || '').trim();
+  c.name     = newName || c.name;
   c.birthday = (document.getElementById('modal-bday-inp').value  || '').trim();
   c.notes    = (document.getElementById('modal-notes-inp').value || '').trim();
   saveDB();
-  closeModal();
+  /* Update modal header live before closing */
+  var titleEl = document.querySelector('#client-modal .modal-title');
+  if (titleEl && newName) titleEl.textContent = newName + (c.rankLocked ? ' 🔒' : '');
+  var avatarEl = document.querySelector('#client-modal .modal-avatar');
+  if (avatarEl && newName) avatarEl.textContent = newName[0].toUpperCase();
   renderClientList();
+  refreshAdminStats();
+  closeModal();
   showToast('Client record saved ✦', 'success');
 }
 
@@ -2181,23 +2209,140 @@ function selectVibe(label) {
 }
 
 /* ── Lookbook Grid ── */
+/* ── Lookbook: public render (explore page) ── */
 function renderLookbook() {
   var el = document.getElementById('lookbook-grid');
   if (!el) return;
   var items = DB.config.lookbook || [];
+
+  if (!items.length) {
+    el.innerHTML = '<div class="empty-state" style="grid-column:1/-1;padding:2rem;">No lookbook items added yet</div>';
+    return;
+  }
+
   el.innerHTML = items.map(function (item, i) {
+    /* Show uploaded image if available, otherwise fallback to emoji */
+    var visual = item.image
+      ? '<img src="' + item.image + '" alt="' + item.title + '" class="lb-img"/>'
+      : '<div class="lb-visual">' + (item.emoji || '✨') + '</div>';
+
     return '<div class="lookbook-item" data-delay="' + (i * 80) + '">' +
-      '<div class="lb-visual">' + item.emoji + '</div>' +
+      visual +
       '<div class="lb-info">' +
-        '<div class="lb-title">' + item.title + '</div>' +
-        '<div class="lb-service">' + item.service + '</div>' +
-        '<div class="lb-price">Rs. ' + fmt(item.price) + '</div>' +
+        '<div class="lb-title">' + (item.title || 'Look ' + (i + 1)) + '</div>' +
+        '<div class="lb-service">' + (item.service || '') + '</div>' +
+        '<div class="lb-price">' + (item.price ? 'Rs. ' + fmt(item.price) : '') + '</div>' +
       '</div>' +
       '<div class="lb-overlay">' +
         '<button class="lb-cta-btn" onclick="scrollToServices()">Get This Look →</button>' +
       '</div>' +
     '</div>';
   }).join('');
+}
+
+/* ── Lookbook: admin CRUD panel ── */
+function renderLookbookAdmin() {
+  var el = document.getElementById('lookbook-admin-list');
+  if (!el) return;
+
+  var items = DB.config.lookbook || [];
+
+  if (!items.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:.82rem;padding:.5rem 0;">No lookbook cards yet</div>';
+    return;
+  }
+
+  el.innerHTML = items.map(function (item, i) {
+    var thumb = item.image
+      ? '<img src="' + item.image + '" class="lb-admin-thumb" alt=""/>'
+      : '<div class="lb-admin-thumb-emoji">' + (item.emoji || '✨') + '</div>';
+
+    return '<div class="lb-admin-row">' +
+      '<div class="lb-admin-preview">' + thumb + '</div>' +
+      '<div class="lb-admin-fields">' +
+        '<input type="text"   class="field-input lb-inp-small" placeholder="Title"   value="' + (item.title   || '') + '" onchange="updateLbField(' + i + ',\'title\',this.value)"/>' +
+        '<input type="text"   class="field-input lb-inp-small" placeholder="Service" value="' + (item.service || '') + '" onchange="updateLbField(' + i + ',\'service\',this.value)"/>' +
+        '<input type="number" class="field-input lb-inp-small" placeholder="Price"   value="' + (item.price   || '') + '" onchange="updateLbField(' + i + ',\'price\',this.value)"/>' +
+        '<input type="text"   class="field-input lb-inp-small" placeholder="Emoji fallback" value="' + (item.emoji || '') + '" onchange="updateLbField(' + i + ',\'emoji\',this.value)"/>' +
+      '</div>' +
+      '<div class="lb-admin-actions">' +
+        '<label class="lb-upload-label" title="Upload photo">' +
+          '📷' +
+          '<input type="file" accept="image/*" style="display:none;" onchange="uploadLbImage(' + i + ',this)"/>' +
+        '</label>' +
+        (item.image ? '<button class="lb-rm-img" onclick="removeLbImage(' + i + ')" title="Remove photo">🗑</button>' : '') +
+        '<button class="rm-btn" onclick="removeLbItem(' + i + ')">✕</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+/* Upload image for a lookbook card — converts to base64 and stores in DB */
+function uploadLbImage(idx, input) {
+  var file = input.files[0];
+  if (!file) return;
+
+  /* Cap image size to keep localStorage lean — resize to max 600px */
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    var img    = new Image();
+    img.onload = function () {
+      var canvas  = document.createElement('canvas');
+      var maxSize = 600;
+      var ratio   = Math.min(maxSize / img.width, maxSize / img.height, 1);
+      canvas.width  = Math.round(img.width  * ratio);
+      canvas.height = Math.round(img.height * ratio);
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      var dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+      DB.config.lookbook[idx].image = dataUrl;
+      saveDB();
+      renderLookbookAdmin();
+      renderLookbook();
+      showToast('Photo uploaded! ✦', 'success');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeLbImage(idx) {
+  delete DB.config.lookbook[idx].image;
+  saveDB();
+  renderLookbookAdmin();
+  renderLookbook();
+  showToast('Photo removed', '');
+}
+
+function updateLbField(idx, field, val) {
+  if (!DB.config.lookbook[idx]) return;
+  DB.config.lookbook[idx][field] = field === 'price' ? (parseFloat(val) || 0) : val;
+  saveDB();
+  renderLookbook(); /* live update on explore page */
+}
+
+function removeLbItem(idx) {
+  if (!confirm('Remove this lookbook card?')) return;
+  DB.config.lookbook.splice(idx, 1);
+  saveDB();
+  renderLookbookAdmin();
+  renderLookbook();
+  showToast('Card removed', '');
+}
+
+function addLbItem() {
+  if (!DB.config.lookbook) DB.config.lookbook = [];
+  DB.config.lookbook.push({
+    id:      'lb' + Date.now(),
+    title:   '',
+    service: '',
+    price:   0,
+    emoji:   '✨',
+    image:   null
+  });
+  saveDB();
+  renderLookbookAdmin();
+  showToast('New card added — fill in the details below', 'success');
 }
 
 function scrollToServices() {
@@ -2378,11 +2523,12 @@ function switchATab(btn, tabId) {
   document.querySelectorAll('.a-tab-content').forEach(function (t) { t.classList.remove('active'); });
   document.getElementById('tab-' + tabId).classList.add('active');
 
-  if (tabId === 'alerts')   renderAlerts();
-  if (tabId === 'revenue')  renderRevenuePanel();
-  if (tabId === 'redeem')   renderRedeemDropdown();
-  if (tabId === 'staff')    renderStaffPanel();
+  if (tabId === 'alerts')    renderAlerts();
+  if (tabId === 'revenue')   renderRevenuePanel();
+  if (tabId === 'redeem')    renderRedeemDropdown();
+  if (tabId === 'staff')     renderStaffPanel();
   if (tabId === 'inventory') renderInventoryPanel();
+  if (tabId === 'customize') renderLookbookAdmin();
 }
 
 function switchSrvTab(btn, panelId) {
